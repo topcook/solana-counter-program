@@ -25,14 +25,15 @@ describe('mysolanaapp', () => {
   const program = anchor.workspace.Mysolanaapp;
   it('Creates a counter', async () => {
     const baseAccount = anchor.web3.Keypair.generate();
-    await program.rpc.create({
-      accounts: {
+    await program.methods
+      .create()
+      .accounts({
         baseAccount: baseAccount.publicKey,
         user: provider.wallet.publicKey,
         systemProgram: SystemProgram.programId,
-      },
-      signers: [baseAccount],
-    });
+      })
+      .signers([baseAccount])
+      .rpc();
 
     const account = await program.account.baseAccount.fetch(baseAccount.publicKey);
     console.log('Count 0: ', account.count.toString());
@@ -42,11 +43,11 @@ describe('mysolanaapp', () => {
 
   it('Increments the counter', async () => {
     const baseAccount = _baseAccount;
-    await program.rpc.increment({
-      accounts: {
+    await program.methods.increment()
+      .accounts({
         baseAccount: baseAccount.publicKey,
-      },
-    });
+      })
+      .rpc();
 
     const account = await program.account.baseAccount.fetch(baseAccount.publicKey);
     console.log('Count 1: ', account.count.toString());
