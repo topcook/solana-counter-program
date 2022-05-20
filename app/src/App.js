@@ -1,6 +1,6 @@
 import './App.css';
 import { useState } from 'react';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
 import {
   Program, AnchorProvider, web3
 } from '@project-serum/anchor';
@@ -15,6 +15,8 @@ const wallets = [
   /* view list of available wallets at https://github.com/solana-labs/wallet-adapter#wallets */
   new PhantomWalletAdapter()
 ]
+
+const network = clusterApiUrl('devnet');
 
 const { SystemProgram, Keypair } = web3;
 /* create an account  */
@@ -31,7 +33,6 @@ function App() {
   async function getProvider() {
     /* create the provider and return it to the caller */
     /* network set to local network for now */
-    const network = "http://127.0.0.1:8899";
     const connection = new Connection(network, opts.preflightCommitment);
 
     const provider = new AnchorProvider(
@@ -40,7 +41,7 @@ function App() {
     return provider;
   }
 
-  async function createCounter() {    
+  async function createCounter() {
     const provider = await getProvider()
     /* create the program interface combining the idl, program ID, and provider */
     const program = new Program(idl, programID, provider);
@@ -54,6 +55,18 @@ function App() {
         },
         signers: [baseAccount]
       });
+
+      // await program.methods.create()
+      //   .accounts({
+      //     baseAccount: baseAccount.publicKey,
+      //     user: provider.wallet.publicKey,
+      //     systemProgram: SystemProgram.programId,
+      //   })
+      //   .signers([baseAccount])
+      //   .rpc();
+
+
+
 
       const account = await program.account.baseAccount.fetch(baseAccount.publicKey);
       console.log('account: ', account);
@@ -80,7 +93,7 @@ function App() {
   if (!wallet.connected) {
     /* If the user's wallet is not connected, display connect wallet button. */
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop:'100px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '100px' }}>
         <WalletMultiButton />
       </div>
     )
@@ -110,7 +123,7 @@ function App() {
 
 /* wallet configuration as specified here: https://github.com/solana-labs/wallet-adapter#setup */
 const AppWithProvider = () => (
-  <ConnectionProvider endpoint="http://127.0.0.1:8899">
+  <ConnectionProvider endpoint={network}>
     <WalletProvider wallets={wallets} autoConnect>
       <WalletModalProvider>
         <App />
